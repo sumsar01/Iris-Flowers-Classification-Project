@@ -6,6 +6,11 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import rcParams
 import sqlite3
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+import tensorflow as tf
+from numpy.random import seed
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Dropout
 
 rcParams['figure.figsize'] = 10,8
 sns.set(style='whitegrid', palette='bright',
@@ -19,7 +24,7 @@ con.close()
 
 
 
-print(df.head())
+
 """
 #Species ['Iris-setosa' 'Iris-versicolor' 'Iris-virginica']
 #Plotting data
@@ -39,4 +44,67 @@ for var in continuous:
     df[var] = df[var].astype('float64')
     df[var] = scaler.fit_transform(df[var].values.reshape(-1,1))
     
+print(df.head())    
+
 #test-train split
+X_train, X_test, y_train, y_test = train_test_split(df.drop(['Species'], axis=1), df['Species'], 
+                                                    test_size=0.20, random_state=1)
+
+
+#creating model
+def create_model(lyrs=[8], act='linear', opt='Adam', dr=0.0):
+    
+    #set random seed
+    seed(1)
+    tf.random.set_seed(1)
+    
+    model = Sequential()
+    
+    #create first hidden layer
+    model.add(Dense(lyrs[0], input_dim=X_train.shape[1], activation=act))
+    
+    #create additional hidden layers
+    for i in range(1, len(lyrs)):
+        model.add(Dense(lyrs[i], activation=actlen))
+        
+    #add dropout, default is none
+    model.add(Dropout(dr))
+    
+    #create output layer
+    model.add(Dense(1, activation='sigmoid'))
+    
+    
+    model.compile(loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
+    
+    return model
+
+#creating first model
+model = create_model()
+print(model.summary())
+
+training = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2, verbose=0)
+val_acc = np.mean(training.history['val_accuracy'])
+print("\n%s: %.2f%%" % ('val_accuracy', val_acc*100))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
