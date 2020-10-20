@@ -9,7 +9,7 @@ from numpy.random import seed
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, cross_val_score
 from sklearn.linear_model import SGDClassifier
 from sklearn.kernel_approximation import RBFSampler
 from sklearn import svm
@@ -19,7 +19,7 @@ sns.set(style='whitegrid', palette='bright',
         rc={'figure.figsize': (15,10)})
 
 #If using neural network model set 1
-with_NN = 0
+with_NN = 1
 seed(1)
 
 #Getting data from SQLite database
@@ -65,11 +65,30 @@ X_train, X_test, y_train, y_test = train_test_split(df.drop(['Species'], axis=1)
 
 model = svm.SVC()
 model.fit(X_train, y_train)
-print(model.score(X_train, y_train))
 
 
+cross_val = cross_val_score(model, X_train, y_train, cv=5)
+print( "%f%% is the result for the first model\n" % (cross_val.mean()))
 
+#We now tune parameters
+kernel = ['linear', 'poly', 'rbf', 'sigmoid']
+param_grid = dict(kernel=kernel)
 
+#We now want to use grid search
+grid = GridSearchCV(estimator=model,
+                    param_grid=param_grid,
+                    cv=5,
+                    verbose=2,
+                    n_jobs=-1)
+
+grid_result = grid.fit(X_train, y_train)
+
+print("\nThe best result was with")
+print(grid_result.best_params_)
+print("and had a precision of %f%%, this is a improvement of %f%%\n" 
+      %(grid_result.best_score_, grid_result.best_score_-cross_val.mean()))
+
+first_opt = grid_result.best_score_
 
 
 
