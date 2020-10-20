@@ -11,6 +11,7 @@ import tensorflow as tf
 from numpy.random import seed
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout
+from sklearn.preprocessing import LabelEncoder
 
 rcParams['figure.figsize'] = 10,8
 sns.set(style='whitegrid', palette='bright',
@@ -23,7 +24,7 @@ df = pd.read_sql_query("SELECT * FROM Iris", con, index_col="Id")
 con.close()
 
 
-
+ 
 
 """
 #Species ['Iris-setosa' 'Iris-versicolor' 'Iris-virginica']
@@ -43,12 +44,17 @@ scaler = StandardScaler()
 for var in continuous:
     df[var] = df[var].astype('float64')
     df[var] = scaler.fit_transform(df[var].values.reshape(-1,1))
+
+#Label encoding target 'Iris-setosa'=0 'Iris-versicolor'=1 'Iris-virginica'=2
+label_encoder = LabelEncoder()
+df['Species'] = label_encoder.fit_transform(df['Species'])
+
     
 print(df.head())    
 
 #test-train split
 X_train, X_test, y_train, y_test = train_test_split(df.drop(['Species'], axis=1), df['Species'], 
-                                                    test_size=0.20, random_state=1)
+                                                    test_size=0.10, random_state=1)
 
 
 #creating model
