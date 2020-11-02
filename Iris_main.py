@@ -60,7 +60,7 @@ print(df.head())
 
 #test-train split
 X_train, X_test, y_train, y_test = train_test_split(df.drop(['Species'], axis=1), df['Species'], 
-                                                    test_size=0.10, random_state=1)
+                                                    test_size=0.20, random_state=1)
 
 
 model = svm.SVC()
@@ -89,6 +89,38 @@ print("and had a precision of %f%%, this is a improvement of %f%%\n"
       %(grid_result.best_score_, grid_result.best_score_-cross_val.mean()))
 
 first_opt = grid_result.best_score_
+model = grid_result.best_estimator_
+
+
+preds = model.predict(X_test)
+
+
+
+from sklearn.metrics import mean_absolute_error
+
+error = mean_absolute_error(y_test, preds)
+print(error)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
